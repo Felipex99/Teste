@@ -36,6 +36,9 @@ public class Teste extends AppCompatActivity{
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 Toast.makeText(Teste.this, "Key code:"+keyCode+" | KEY EVENT: "+event, Toast.LENGTH_LONG).show();
                 Log.d("KEY CODE","Key code:"+keyCode+" | KEY EVENT: "+event);
+                if(keyCode==66){
+                    Toast.makeText(Teste.this, "Tenho "+qtd_filhos.getText().toString()+" filhos", Toast.LENGTH_SHORT).show();
+                }
                 return false;
             }
         });
