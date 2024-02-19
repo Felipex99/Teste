@@ -19,8 +19,8 @@ import androidx.appcompat.widget.AppCompatTextView;
 public class Teste extends AppCompatActivity{
     private LinearLayout frame;
     private AppCompatEditText qtd_filhos;
-    private int child_count;
-    private AppCompatButton add;
+    private int child_count = 0;
+    private AppCompatButton add, rmv;
 
     private String filhos;
     @Override
@@ -30,65 +30,42 @@ public class Teste extends AppCompatActivity{
         frame = findViewById(R.id.frameLayout);
         qtd_filhos = findViewById(R.id.qtd_filhos);
         add = findViewById(R.id.add);
+        rmv = findViewById(R.id.rmv);
         filhos = qtd_filhos.getText().toString();
-        qtd_filhos.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                Toast.makeText(Teste.this, "Key code:"+keyCode+" | KEY EVENT: "+event, Toast.LENGTH_LONG).show();
-                Log.d("KEY CODE","Key code:"+keyCode+" | KEY EVENT: "+event);
-                if(keyCode==66){
-                    Toast.makeText(Teste.this, "Tenho "+qtd_filhos.getText().toString()+" filhos", Toast.LENGTH_SHORT).show();
-                }
-                return false;
-            }
-        });
-        if (!(qtd_filhos.getText().toString()!=null)){
-            add.setText("aaaaaaaaaaaaaaaaaaaaaaa");
-            Toast.makeText(this, "Não tá vazio", Toast.LENGTH_SHORT).show();
-        }
 
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(Teste.this, "Clicado", Toast.LENGTH_SHORT).show();
-                addChild();
+                child_count = Integer.parseInt(qtd_filhos.getText().toString());
+                for(int i = 0;i<child_count;i++){
+                    addChild();
+                }
+            }
+        });
+        rmv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                child_count = 0;
+                frame.removeAllViews();
+                Toast.makeText(Teste.this, "Quantidade de filhos"+frame.getChildCount(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     private void addChild() {
-        child_count++;
         AppCompatTextView novo_texto = new AppCompatTextView(this);
         LinearLayout linearLayout = new LinearLayout(this);
 
         View childView = LayoutInflater.from(this).inflate(R.layout.child, null);
         int childId = View.generateViewId();
+
         childView.setId(childId);
-        frame.addView(childView);
+
         AppCompatTextView texto_nome = childView.findViewById(R.id.texto_nome);
         AppCompatTextView texto_idade = childView.findViewById(R.id.texto_idade);
+
         String Snome = texto_nome.getText().toString() + childId;
         texto_nome.setText(Snome);
         String Sidade = texto_idade.getText().toString() + childId;
@@ -96,7 +73,9 @@ public class Teste extends AppCompatActivity{
         AppCompatEditText idade = childView.findViewById(R.id.idade);
         AppCompatEditText nome = childView.findViewById(R.id.nome);
 
+        frame.addView(childView);
     }
+
     //criarFrames(frame);
 //        frame.addView(linearLayout);
 //        frame.addView(novo_texto);
