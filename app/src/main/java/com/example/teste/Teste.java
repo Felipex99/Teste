@@ -1,4 +1,5 @@
 package com.example.teste;
+import android.database.sqlite.SQLiteStatement;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatTextView;
+import android.database.sqlite.SQLiteDatabase;
 
 public class Teste extends AppCompatActivity{
     private LinearLayout frame;
@@ -27,6 +29,7 @@ public class Teste extends AppCompatActivity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.teste_layout);
+        criarBanco();
         frame = findViewById(R.id.frameLayout);
         qtd_filhos = findViewById(R.id.qtd_filhos);
         add = findViewById(R.id.add);
@@ -74,6 +77,34 @@ public class Teste extends AppCompatActivity{
         AppCompatEditText nome = childView.findViewById(R.id.nome);
 
         frame.addView(childView);
+    }
+
+    public void criarBanco(){
+        try{
+            SQLiteDatabase banco = openOrCreateDatabase("banco",MODE_PRIVATE,null);
+            banco.execSQL("CREATE TABLE IF NOT EXISTS filho(" +
+                    "ID INTEGER  PRIMARY KEY AUTOINCREMENT," +
+                    "NOME VARCHAR," +
+                    "IDADE INTEGER)");
+            banco.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void inserir(){
+        try{
+            for(int i = 0 ;)
+            SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE,null);
+            String query = "INSERT INTO filho(NOME, IDADE) VALUES (?, ?)";
+            SQLiteStatement stmt = banco.compileStatement(query);
+            if("NOME"!=null){
+                stmt.bindString(1,);
+            }
+            banco.execSQL("INSERT INTO filho()");
+        }catch (Exception e){
+
+        }
     }
 
     //criarFrames(frame);
