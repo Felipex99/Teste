@@ -20,9 +20,9 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class Teste extends AppCompatActivity{
     private LinearLayout frame;
-    private AppCompatEditText qtd_filhos;
+    private AppCompatEditText qtd_filhos,qtd_irmaos;
     private int child_count = 0;
-    private AppCompatButton add, rmv;
+    private AppCompatButton add, rmv,salvar;
 
     private String filhos;
     @Override
@@ -34,6 +34,7 @@ public class Teste extends AppCompatActivity{
         qtd_filhos = findViewById(R.id.qtd_filhos);
         add = findViewById(R.id.add);
         rmv = findViewById(R.id.rmv);
+        salvar = findViewById(R.id.salvar);
         filhos = qtd_filhos.getText().toString();
 
         add.setOnClickListener(new View.OnClickListener() {
@@ -52,6 +53,13 @@ public class Teste extends AppCompatActivity{
                 child_count = 0;
                 frame.removeAllViews();
                 Toast.makeText(Teste.this, "Quantidade de filhos"+frame.getChildCount(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        salvar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inserir();
             }
         });
     }
@@ -94,16 +102,31 @@ public class Teste extends AppCompatActivity{
 
     public void inserir(){
         try{
-            for(int i = 0 ;)
             SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE,null);
             String query = "INSERT INTO filho(NOME, IDADE) VALUES (?, ?)";
-            SQLiteStatement stmt = banco.compileStatement(query);
-            if("NOME"!=null){
-                stmt.bindString(1,);
-            }
-            banco.execSQL("INSERT INTO filho()");
-        }catch (Exception e){
+            if(Integer.parseInt(qtd_filhos.getText().toString())>0){
+                for(int i = 0 ;i<frame.getChildCount();i++){
+                    SQLiteStatement stmt = banco.compileStatement(query);
+                    View childView = frame.getChildAt(i);
+                    AppCompatEditText nome = childView.findViewById(R.id.nome);
+                    AppCompatEditText idade = childView.findViewById(R.id.idade);
 
+                    if("NOME"!=null){
+                        stmt.bindString(1, nome.getText().toString());
+                    }else{
+                        stmt.bindString(1, "");
+                    }
+                    if("IDADE"!=null){
+                        stmt.bindString(2,idade.getText().toString());
+                    }else{
+                        stmt.bindString(2,"");
+                    }
+                    stmt.executeInsert();
+                }
+            }
+            Toast.makeText(this, "DADOS INSERIDOS COM SUCESSO", Toast.LENGTH_SHORT).show();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

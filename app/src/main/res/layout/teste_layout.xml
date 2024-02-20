@@ -25,6 +25,14 @@
             android:layout_marginTop="3dp"
             android:text="REMOVER"
             android:textStyle="bold"/>
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/salvar"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="SALVAR"
+            android:textStyle="bold"/>
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
