@@ -1,14 +1,9 @@
 package com.example.teste;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -19,10 +14,12 @@ import androidx.appcompat.widget.AppCompatTextView;
 import android.database.sqlite.SQLiteDatabase;
 
 public class Teste extends AppCompatActivity{
-    private LinearLayout frame;
-    private AppCompatEditText qtd_filhos,qtd_irmaos;
-    private int child_count = 0;
-    private AppCompatButton add, rmv,salvar;
+    private LinearLayout framefilho,frameirmao;
+    private AppCompatEditText ent_qtd;
+    private AppCompatTextView  pergunta;
+    private boolean irmao_filho = true;
+    private int child_count = 0,qtd_filhos,qtd_irmaos;
+    private AppCompatButton add, rmv,salvar,trocar;
 
     private String filhos;
     @Override
@@ -30,29 +27,57 @@ public class Teste extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.teste_layout);
         criarBanco();
-        frame = findViewById(R.id.frameLayout);
-        qtd_filhos = findViewById(R.id.qtd_filhos);
+        SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE,null);
+        framefilho = findViewById(R.id.framefilho);
+        frameirmao = findViewById(R.id.frameirmao);
+        ent_qtd = findViewById(R.id.entrada_quantidade);
+        pergunta = findViewById(R.id.pergunta);
         add = findViewById(R.id.add);
+        trocar = findViewById(R.id.trocar);
+        trocar.setText("IRMÃO");
         rmv = findViewById(R.id.rmv);
         salvar = findViewById(R.id.salvar);
-        filhos = qtd_filhos.getText().toString();
-
+        filhos = ent_qtd.getText().toString();
+        trocar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(irmao_filho){
+                    trocar.setText("FILHOS");
+                    pergunta.setText("DIGITE A QUANTIDADE DE FILHOS");
+                    irmao_filho = false;
+                }else{
+                    trocar.setText("IRMÃO");
+                    pergunta.setText("DIGITE A QUANTIDADE DE IRMÃOS");
+                    irmao_filho = true;
+                }
+            }
+        });
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(Teste.this, "Clicado", Toast.LENGTH_SHORT).show();
-                child_count = Integer.parseInt(qtd_filhos.getText().toString());
-                for(int i = 0;i<child_count;i++){
-                    addChild();
+                if(irmao_filho){
+                    child_count = Integer.parseInt(ent_qtd.getText().toString());
+                    qtd_filhos = child_count;
+                    for(int i = 0;i<child_count;i++){
+                        addBrother();
+                    }
+                }else{
+                    qtd_irmaos = Integer.parseInt(ent_qtd.getText().toString());
+                    child_count = Integer.parseInt(ent_qtd.getText().toString());
+                    for(int i = 0;i<child_count;i++){
+                        addChild();
+                    }
                 }
+                Toast.makeText(Teste.this, "IRMÃO ADICIONADO", Toast.LENGTH_SHORT).show();
+
             }
         });
         rmv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 child_count = 0;
-                frame.removeAllViews();
-                Toast.makeText(Teste.this, "Quantidade de filhos"+frame.getChildCount(), Toast.LENGTH_SHORT).show();
+                framefilho.removeAllViews();
+                frameirmao.removeAllViews();
             }
         });
 
@@ -66,10 +91,7 @@ public class Teste extends AppCompatActivity{
 
 
     private void addChild() {
-        AppCompatTextView novo_texto = new AppCompatTextView(this);
-        LinearLayout linearLayout = new LinearLayout(this);
-
-        View childView = LayoutInflater.from(this).inflate(R.layout.child, null);
+        View childView = LayoutInflater.from(this).inflate(R.layout.child_filho, null);
         int childId = View.generateViewId();
 
         childView.setId(childId);
@@ -84,16 +106,48 @@ public class Teste extends AppCompatActivity{
         AppCompatEditText idade = childView.findViewById(R.id.idade);
         AppCompatEditText nome = childView.findViewById(R.id.nome);
 
-        frame.addView(childView);
+        framefilho.addView(childView);
+    }
+
+    private void addBrother(){
+        View childBrother = LayoutInflater.from(this).inflate(R.layout.child_irmao,null);
+        int childId = View.generateViewId();
+
+        childBrother.setId(childId);
+
+        AppCompatTextView texto_nome = childBrother.findViewById(R.id.texto_nome);
+        AppCompatTextView texto_idade = childBrother.findViewById(R.id.texto_idade);
+        AppCompatEditText nome_irmao = childBrother.findViewById(R.id.nome_irmao);
+        AppCompatEditText idade_irmao = childBrother.findViewById(R.id.idade_irmao);
+
+        String Snome = texto_nome.getText().toString()+ childId;
+        String Sidade = texto_idade.getText().toString()+childId;
+        texto_nome.setText(Snome);
+        texto_idade.setText(Sidade);
+        frameirmao.addView(childBrother);
     }
 
     public void criarBanco(){
         try{
             SQLiteDatabase banco = openOrCreateDatabase("banco",MODE_PRIVATE,null);
+//            banco.execSQL("DROP TABLE IF EXISTS filho ");
+//            banco.execSQL("DROP TABLE IF EXISTS irmao ");
+//            banco.execSQL("DROP TABLE IF EXISTS pai");
+            banco.execSQL("CREATE TABLE IF NOT EXISTS pai(" +
+                    "ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "NOME VARCHAR)");
             banco.execSQL("CREATE TABLE IF NOT EXISTS filho(" +
                     "ID INTEGER  PRIMARY KEY AUTOINCREMENT," +
+                    "ID_PAI INTEGER," +
                     "NOME VARCHAR," +
-                    "IDADE INTEGER)");
+                    "IDADE INTEGER," +
+                    "FOREIGN KEY (ID_PAI) REFERENCES pai(ID))");
+            banco.execSQL("CREATE TABLE IF NOT EXISTS irmao(" +
+                    "ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "ID_PAI INTEGER," +
+                    "NOME VARCHAR," +
+                    "IDADE INTEGER," +
+                    "FOREIGN KEY (ID_PAI) REFERENCES pai(ID))");
             banco.close();
         }catch (Exception e){
             e.printStackTrace();
@@ -104,10 +158,10 @@ public class Teste extends AppCompatActivity{
         try{
             SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE,null);
             String query = "INSERT INTO filho(NOME, IDADE) VALUES (?, ?)";
-            if(Integer.parseInt(qtd_filhos.getText().toString())>0){
-                for(int i = 0 ;i<frame.getChildCount();i++){
+            if(qtd_filhos>0){
+                for(int i = 0 ;i<framefilho.getChildCount();i++){
                     SQLiteStatement stmt = banco.compileStatement(query);
-                    View childView = frame.getChildAt(i);
+                    View childView = framefilho.getChildAt(i);
                     AppCompatEditText nome = childView.findViewById(R.id.nome);
                     AppCompatEditText idade = childView.findViewById(R.id.idade);
 
@@ -124,6 +178,29 @@ public class Teste extends AppCompatActivity{
                     stmt.executeInsert();
                 }
             }
+            query = "INSERT INTO irmao(NOME, IDADE) VALUES (?, ?)";
+            if(qtd_irmaos>0){
+                for(int i = 0 ;i<frameirmao.getChildCount();i++){
+                    SQLiteStatement stmt = banco.compileStatement(query);
+                    View childView = frameirmao.getChildAt(i);
+                    AppCompatEditText nome = childView.findViewById(R.id.nome_irmao);
+                    AppCompatEditText idade = childView.findViewById(R.id.idade_irmao);
+
+                    if("NOME"!=null){
+                        stmt.bindString(1, nome.getText().toString());
+                    }else{
+                        stmt.bindString(1, "");
+                    }
+                    if("IDADE"!=null){
+                        stmt.bindString(2,idade.getText().toString());
+                    }else{
+                        stmt.bindString(2,"");
+                    }
+                    stmt.executeInsert();
+                }
+            }
+            query = "INSERT INTO pai(NOME)VALUES(?)";
+            banco.close();
             Toast.makeText(this, "DADOS INSERIDOS COM SUCESSO", Toast.LENGTH_SHORT).show();
         }catch (Exception e){
             e.printStackTrace();
