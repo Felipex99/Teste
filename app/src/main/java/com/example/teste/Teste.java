@@ -15,19 +15,22 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class Teste extends AppCompatActivity{
     private LinearLayout framefilho,frameirmao;
-    private AppCompatEditText ent_qtd;
+    private AppCompatEditText ent_qtd, nome;
     private AppCompatTextView  pergunta;
     private boolean irmao_filho = true;
     private int child_count = 0,qtd_filhos,qtd_irmaos;
-    private AppCompatButton add, rmv,salvar,trocar;
+    private AppCompatButton add, rmv, salvar, trocar;
+
+
 
     private String filhos;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.teste_layout);
-        criarBanco();
         SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE,null);
+        Toast.makeText(this, "Banco is open"+banco.isOpen(), Toast.LENGTH_SHORT).show();
+        criarBanco();
         framefilho = findViewById(R.id.framefilho);
         frameirmao = findViewById(R.id.frameirmao);
         ent_qtd = findViewById(R.id.entrada_quantidade);
@@ -37,6 +40,7 @@ public class Teste extends AppCompatActivity{
         trocar.setText("IRMÃO");
         rmv = findViewById(R.id.rmv);
         salvar = findViewById(R.id.salvar);
+        nome = findViewById(R.id.nome);
         filhos = ent_qtd.getText().toString();
         trocar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,7 +152,6 @@ public class Teste extends AppCompatActivity{
                     "NOME VARCHAR," +
                     "IDADE INTEGER," +
                     "FOREIGN KEY (ID_PAI) REFERENCES pai(ID))");
-            banco.close();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -157,31 +160,48 @@ public class Teste extends AppCompatActivity{
     public void inserir(){
         try{
             SQLiteDatabase banco = openOrCreateDatabase("banco", MODE_PRIVATE,null);
-            String query = "INSERT INTO filho(NOME, IDADE) VALUES (?, ?)";
+
+            String query = "INSERT INTO pai(NOME)VALUES(?)";
+            SQLiteStatement stmt = banco.compileStatement(query);
+
+            if("NOME"!=null){
+                stmt.bindString(1, nome.getText().toString());
+            }else{
+                stmt.bindString(1,"");
+            }
+            long id  = stmt.executeInsert();
+
+            Toast.makeText(this, "IDPAI: "+id, Toast.LENGTH_SHORT).show();
+
+            query = "INSERT INTO filho(NOME, IDADE, ID_PAI) VALUES (?, ?, ?)";
+            stmt = banco.compileStatement(query);
             if(qtd_filhos>0){
                 for(int i = 0 ;i<framefilho.getChildCount();i++){
-                    SQLiteStatement stmt = banco.compileStatement(query);
                     View childView = framefilho.getChildAt(i);
                     AppCompatEditText nome = childView.findViewById(R.id.nome);
                     AppCompatEditText idade = childView.findViewById(R.id.idade);
-
-                    if("NOME"!=null){
+                    if("NOME" != null){
                         stmt.bindString(1, nome.getText().toString());
                     }else{
                         stmt.bindString(1, "");
                     }
-                    if("IDADE"!=null){
+                    if("IDADE" != null){
                         stmt.bindString(2,idade.getText().toString());
                     }else{
                         stmt.bindString(2,"");
                     }
+                    if("ID_PAI" != null){
+                        stmt.bindString(3,String.valueOf(id));
+                    }else{
+                        stmt.bindString(3,"");
+                    }
                     stmt.executeInsert();
                 }
             }
-            query = "INSERT INTO irmao(NOME, IDADE) VALUES (?, ?)";
+            query = "INSERT INTO irmao(NOME, IDADE, ID_PAI) VALUES (?, ?, ?)";
+            stmt = banco.compileStatement(query);
             if(qtd_irmaos>0){
                 for(int i = 0 ;i<frameirmao.getChildCount();i++){
-                    SQLiteStatement stmt = banco.compileStatement(query);
                     View childView = frameirmao.getChildAt(i);
                     AppCompatEditText nome = childView.findViewById(R.id.nome_irmao);
                     AppCompatEditText idade = childView.findViewById(R.id.idade_irmao);
@@ -196,11 +216,15 @@ public class Teste extends AppCompatActivity{
                     }else{
                         stmt.bindString(2,"");
                     }
+                    if("ID_PAI"!=null){
+                        stmt.bindString(3, String.valueOf(id));
+                    }else{
+                        stmt.bindString(3,"");
+                    }
                     stmt.executeInsert();
                 }
             }
-            query = "INSERT INTO pai(NOME)VALUES(?)";
-            banco.close();
+
             Toast.makeText(this, "DADOS INSERIDOS COM SUCESSO", Toast.LENGTH_SHORT).show();
         }catch (Exception e){
             e.printStackTrace();
